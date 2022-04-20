@@ -1,18 +1,18 @@
-name: Tests
+name: Build
 
 on:
   push:
     branches: [master]
 
 jobs:
-  tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Build the Docker image
-        run: docker build -t knowable/react-test -f ./client/Dockerfile.dev ./client
-      - name: Run tests
-        run: docker run -e CI=true knowable/react-test npm test
+#  tests:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: Build the Docker image
+#        run: docker build -t knowable/react-test -f ./client/Dockerfile.dev ./client
+#      - name: Run tests
+#        run: docker run -e CI=true knowable/react-test npm test
 
   build:
     runs-on: ubuntu-latest
@@ -37,8 +37,7 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v2
         with:
-          context: ./client
-          file: Dockerfile
+          context: "{{defaultContext}}:client"
           builder: ${{ steps.buildx.outputs.name }}
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/multi-client:latest
