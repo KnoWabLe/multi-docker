@@ -73,3 +73,28 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/multi-worker:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Generate deployment package
+        run: zip -r deploy.zip . -x '*.git*' -x '**node_modules**'
+
+      - name: Get timestamp
+        uses: gerred/actions/current-time@master
+        id: current-time
+
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v20
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS }}
+          application_name: complex
+          environment_name: Complex-env
+          version_label: ${{ steps.current-time.outputs.time }}
+          region: eu-central-1
+          deployment_package: deploy.zip
